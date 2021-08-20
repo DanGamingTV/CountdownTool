@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+p {
+  text-align: center;
+  font-size: 60px;
+  margin-top: 0px;
+}
+</style>
+</head>
+<body>
+
+<p id="demo"></p>
+<span>Date Data:</span> <input type="text" id="dat" placeholder="Aug 2, 2021 15:15:00"> <button onclick="setDateStuff()">Set</button>
+<script>
+// Set the date we're counting down to
+//var countDownDate = new Date("Aug 2, 2021 15:15:00").getTime();
+
+var closePeriodTimes = ["08:45", "09:00", "10:00", "11:00", "11:30", "12:30", "13:30", "14:15", "15:15"]
+
+function minutesAbsValTo24HRtime(mins) {
+  var thingy = mins/60
+  var hoursExtracted = Math.floor(thingy)
+  var minutesExtracted = Math.floor((thingy-hoursExtracted)*60)
+  return [hoursExtracted, minutesExtracted]
+}
+
+function findNearestTargetTime() {
+  var now2 = new Date();
+  var currentSpecialMinutes = (parseInt(now2.getHours(), 10)*60) + parseInt(now2.getMinutes(), 10)
+  // console.log(`currentSpecialMinutes: ${currentSpecialMinutes}`)
+  periodTimesInMinutes = []
+  // console.log(closePeriodTimes)
+  for (i = 0; i < closePeriodTimes.length; i++) {
+    var perTime = closePeriodTimes[i]
+    var splitted = perTime.split(":")
+    var calcedMinTime = (parseInt(splitted[0], 10)*60) + parseInt(splitted[1], 10)
+    // console.log(calcedMinTime)
+    if (calcedMinTime <= currentSpecialMinutes) {
+      // console.log(`bye bye ${perTime}`)
+      //closePeriodTimes.splice(i, 1)
+    } else {
+      // console.log(`we addin ${perTime}`)
+      periodTimesInMinutes.push(calcedMinTime)
+    }
+  }
+  // console.log(periodTimesInMinutes)
+  var closest = periodTimesInMinutes.reduce(function(prev, curr) {
+    return (Math.abs(curr - currentSpecialMinutes) < Math.abs(prev - currentSpecialMinutes) ? curr : prev);
+  })
+  // console.log(closest)
+  // console.log(periodTimesInMinutes)
+  var theDateTHingy = minutesAbsValTo24HRtime(closest).join(":")
+  return `${now2.getMonth()+1}/${now2.getDate()}/${now2.getFullYear()} ${theDateTHingy}`
+}
+
+var countDownDate;
+// Update the count down every 1 second
+var pageLoad;
+function setDateStuff() {
+countDownDate = new Date(document.querySelector("#dat").value).getTime();
+pageLoad = new Date().getTime();
+
+//START
+var x = setInterval(function() {
+
+  // Get today's date and time
+  var now = new Date().getTime();
+    //// console.log(`percentage: ${100-((countDownDate-now)*100)}%`)
+  // Find the distance between now and the count down date
+  var distance = countDownDate - now;
+    
+  // Time calculations for days, hours, minutes and seconds
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    
+  // Output the result in an element with id="demo"
+  //days > 0 ? `${days}d ` ? `` + hours > 0 ? `${hours} h` : ``
+  var formattedDateString = days + "d " + hours + "h "
+  + minutes + "m " + seconds + "s ";
+  document.getElementById("demo").innerHTML = formattedDateString
+  document.title = `${formattedDateString} - Countdown`
+    
+  // If the count down is over, write some text 
+  if (distance < 0) {
+    clearInterval(x);
+    document.getElementById("demo").innerHTML = "EXPIRED";
+    document.title = "EXPIRED";
+    setTimeout(setNearTimeLoop, 2000)
+  }
+}, 1000);
+
+//END
+
+}
+
+function setNearTimeLoop() {
+  var nerTargTim = findNearestTargetTime()
+  var inpElm = document.getElementById("dat")
+  inpElm.placeholder = nerTargTim
+  inpElm.value = nerTargTim
+  setDateStuff()
+}
+
+setNearTimeLoop()
+
+</script>
+
+</body>
+</html>
+
